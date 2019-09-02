@@ -1,0 +1,25 @@
+# Rust
+
+/target/
+/*/target/
+/mods/*/target/
+
+# Vim
+
+**/*.vi
+**/*.swp
+
+# IntelliJ
+
+**/.idea/
+**/*.iml
+
+# VSCode
+
+/.vscode/*
+!/.vscode/launch.json
+*.code-workspace
+
+# Eclipse
+
+.project
