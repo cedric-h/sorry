@@ -7,20 +7,17 @@ fn main() {
     let item_compendium = vec![
         "Blood",
         "Water",
-        "Circle_Sigil",
-        //"Gym Shorts",
         "Salt",
         "Cloth",
         "Broom",
         "Handle",
         "Fibers",
-        //"Assault Rifle",
         "Skeleton",
     ];
     let mut inventory: Vec<Item> = Vec::new();
 
     println!("Welcome to Crafting Sim CLI!");
-    println!("Enter \"Help\" for help.");
+    println!("Enter \"help\" for help");
 
     loop {
         let mut input = String::new();
@@ -29,6 +26,12 @@ fn main() {
         let mut words = input.split_whitespace();
 
         match words.next() {
+            Some("help") => {
+                println!("Command list:
+                    \n\"give\" will give you a certain amount of items
+                    \n\"show\" lets you see your inventory
+                    \n\"quit\" terminates the program");
+            },
             Some("give") => {
                 let mut item_name = String::new();
                 let mut item_count = 1;
@@ -41,13 +44,13 @@ fn main() {
                         if let Some(third_word) = words.next() {
                             item_name = third_word.to_string();
                         } else {
-                            println!("I don't know what to give you.");
+                            println!("I don't know what to give you!");
                         }
                     } else {
                         item_name = second_word.to_string();
                     }
                 } else {
-                    println!("You need to tell us what to give you");
+                    println!("I don't know what to give you!");
                 }
 
                 let item_name = item_name.to_lowercase();
@@ -59,7 +62,8 @@ fn main() {
 
                 // if the item the user gave us is in the game,
                 if lowercase_compendium.contains(&item_name) {
-                    println!("{} {}, coming right up!", item_count, item_name);
+                    println!("It's dangerous to go alone! Take this!");
+                    println!("You recieved {} unit(s) of {}", item_count, item_name);
 
                     let mut does_item_already_exist = false;
 
@@ -83,14 +87,15 @@ fn main() {
 
             Some("show") => {
                 for item in inventory.iter() {
-                    println!("You have {} {}", item.count, item.name);
+                    println!("Here is a list of items you have:");
+                    println!("You have {} unit(s) of {}", item.count, item.name);
                 }
             }
 
-            Some("q") | Some("quit") => break,
+            Some("quit") => break,
 
             _ => {
-                println!("invalid command!");
+                println!("Invalid command!");
             }
         }
     }
