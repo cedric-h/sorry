@@ -1,0 +1,17 @@
+[package]
+name = "comn"
+version = "0.1.0"
+authors = ["Cedric Hutchings <cedhut02@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+# math/ecs
+specs = { version = "0.15.0", features = ["specs-derive"], default-features = false }
+specs-physics = { git = "https://github.com/cedric-h/specs-physics.git", branch = "default-parallel-feature", features = ["serde-serialize"], default-features = false }
+nalgebra = { version = "0.18.0", features = ["serde-serialize"] }
+
+# serialization
+serde = { version = "1.0.99", features = ["derive"] }
+rmp-serde = "0.14.0"
