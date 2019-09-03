@@ -13,6 +13,7 @@ fn main() {
         "Handle",
         "Fibers",
         "Skeleton",
+        "Circle Sigil",
     ];
     let mut inventory: Vec<Item> = Vec::new();
 
@@ -26,13 +27,13 @@ fn main() {
         let mut words = input.split_whitespace();
 
         match words.next() {
-            Some("help") => {
+            Some("help") | Some("h") => {
                 println!("Command list:
                     \n\"give\" will give you a certain amount of items
                     \n\"show\" lets you see your inventory
                     \n\"quit\" terminates the program");
             },
-            Some("give") => {
+            Some("give") | Some("g") => {
                 let mut item_name = String::new();
                 let mut item_count = 1;
 
@@ -42,12 +43,26 @@ fn main() {
                         item_count = number;
 
                         if let Some(third_word) = words.next() {
+                        	if let Some(fourth_word) = words.next() {
+                        		item_name = third_word.to_string() + " " + &fourth_word.to_string();
+                        	}
+                        	else {
                             item_name = third_word.to_string();
+                        }
+
+
                         } else {
                             println!("I don't know what to give you!");
                         }
                     } else {
+                    	if let Some(third_word) = words.next() {
+                    		item_name = second_word.to_string() + " " + &third_word.to_string();
+                    	} else {
                         item_name = second_word.to_string();
+                        		}
+
+
+
                     }
                 } else {
                     println!("I don't know what to give you!");
@@ -85,14 +100,14 @@ fn main() {
                 }
             }
 
-            Some("show") => {
+            Some("show") | Some("s") => {
                 for item in inventory.iter() {
                     println!("Here is a list of items you have:");
                     println!("You have {} unit(s) of {}", item.count, item.name);
                 }
             }
 
-            Some("quit") => break,
+            Some("quit") | Some("q") => break,
 
             _ => {
                 println!("Invalid command!");
