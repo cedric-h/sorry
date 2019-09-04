@@ -28,11 +28,13 @@ fn main() {
 
         match words.next() {
             Some("help") | Some("h") => {
-                println!("Command list:
+                println!(
+                    "Command list:
                     \n\"give\" will give you a certain amount of items
                     \n\"show\" lets you see your inventory
-                    \n\"quit\" terminates the program");
-            },
+                    \n\"quit\" terminates the program"
+                );
+            }
             Some("give") | Some("g") => {
                 let mut item_name = String::new();
                 let mut item_count = 1;
@@ -43,26 +45,20 @@ fn main() {
                         item_count = number;
 
                         if let Some(third_word) = words.next() {
-                        	if let Some(fourth_word) = words.next() {
-                        		item_name = third_word.to_string() + " " + &fourth_word.to_string();
-                        	}
-                        	else {
-                            item_name = third_word.to_string();
-                        }
-
-
+                            if let Some(fourth_word) = words.next() {
+                                item_name = third_word.to_string() + " " + &fourth_word.to_string();
+                            } else {
+                                item_name = third_word.to_string();
+                            }
                         } else {
                             println!("I don't know what to give you!");
                         }
                     } else {
-                    	if let Some(third_word) = words.next() {
-                    		item_name = second_word.to_string() + " " + &third_word.to_string();
-                    	} else {
-                        item_name = second_word.to_string();
-                        		}
-
-
-
+                        if let Some(third_word) = words.next() {
+                            item_name = second_word.to_string() + " " + &third_word.to_string();
+                        } else {
+                            item_name = second_word.to_string();
+                        }
                     }
                 } else {
                     println!("I don't know what to give you!");
