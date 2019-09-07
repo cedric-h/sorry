@@ -1,12 +1,16 @@
 type Entity = Vec<Component>;
 
+#[derive(Debug)]
 enum Component {
-    Item {
+    Name {
         name: String,
     },
-    Decomposition {
+    Decomposable {
         components: Vec<Entity>,
     },
+    Glowing {
+        lumens: u8,
+    }
 }
 
 fn main() {
@@ -41,10 +45,50 @@ fn main() {
                     \n\"quit\" terminates the program"
                 );
             }
+
             Some("give") | Some("g") => {
+                let item = vec![
+                    Component::Name {
+                        name: "Sheep Loin".to_string(),
+                    },
+                    Component::Decomposable {
+                        components: Vec::new(),
+                    },
+                    Component::Glowing {
+                        lumens: 5,
+                    }
+                ];
+
+                inventory.push(item);
+
+                println!("Congratulations, you get a sheep loin");
             }
 
             Some("show") | Some("s") => {
+                for item in inventory.iter() {
+                    let mut full_name = String::new();
+                    
+                    // set name to their name
+                    for comp in item.iter() {
+                        if let Component::Name { name } = comp {
+                            full_name = name.to_string();
+                        }
+                    }
+
+                    // add modifiers to name
+                    for comp in item.iter() {
+                        match comp {
+                            Component::Name { .. } => {},
+                            _ => {
+                                let comp_string = format!("{:?}", comp);
+                                let comp_name = comp_string.split_whitespace().next().unwrap();
+                                full_name = format!("{} {}", comp_name, full_name).to_string();
+                            },
+                        }
+                    }
+
+                    println!("[0] {}", full_name);
+                }
             }
 
             Some("quit") | Some("q") => break,
