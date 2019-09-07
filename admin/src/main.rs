@@ -5,6 +5,13 @@ use tungstenite::{accept_hdr, handshake::server::Request, Message};
 
 fn main() {
     pretty_env_logger::init();
+
+    let world = specs::World::new();
+}
+
+mod net {
+    pub struct ConnectionManager {
+    }
     let server = TcpListener::bind("127.0.0.1:3012").unwrap();
     for stream in server.incoming() {
         println!("here!");
