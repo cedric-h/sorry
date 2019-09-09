@@ -1,45 +1,60 @@
-use std::thread::spawn;
-use std::net::TcpListener;
+// util
+use log::*;
+use std::f32::consts::PI;
+// ecs
+use specs::WorldExt;
+// our code/reexports
+use comn::{
+    na,
+    specs::{self, prelude::*},
+    specs_physics::SimplePosition,
+};
 
-use tungstenite::{accept_hdr, handshake::server::Request, Message};
+mod net;
 
 fn main() {
-    pretty_env_logger::init();
+    pretty_env_logger::formatted_builder()
+        .filter(None, log::LevelFilter::Debug)
+        .init();
 
-    let world = specs::World::new();
-}
+    let mut world = specs::World::new();
+    #[rustfmt::skip]
+    let dispatcher_builder = DispatcherBuilder::new()
+        .with(net::HandleClientPackets,     "client packets",   &[])
+        .with(net::SendWorldToNewPlayers,   "send world",       &[]);
+    let mut dispatcher = dispatcher_builder.build();
 
-mod net {
-    pub struct ConnectionManager {
-    }
-    let server = TcpListener::bind("127.0.0.1:3012").unwrap();
-    for stream in server.incoming() {
-        println!("here!");
-        spawn(move || {
-            let callback = |req: &Request| {
-                println!("Received a new ws handshake");
-                println!("The request's path is: {}", req.path);
-                println!("The request's headers are:");
-                for &(ref header, _ /* value */) in req.headers.iter() {
-                    println!("* {}", header);
-                }
+    dispatcher.setup(&mut world);
 
-                // Let's add an additional header to our response to the client.
-                let extra_headers = vec![
-                    (String::from("MyCustomHeader"), String::from(":)")),
-                    (String::from("SOME_TUNGSTENITE_HEADER"), String::from("header_value")),
-                ];
-                Ok(Some(extra_headers))
-            };
-            let mut websocket = accept_hdr(stream.unwrap(), callback).unwrap();
-            websocket.write_message(Message::Text("Hello!".to_string())).unwrap();
+    // add some dummy ents
+    world
+        .create_entity()
+        .with(comn::art::Appearance {
+            filepath: String::from("hi"),
+        })
+        .with(SimplePosition(na::Isometry3::rotation(
+            na::Vector3::repeat(PI * 0.25),
+        )))
+        .build();
 
-            loop {
-                let msg = websocket.read_message().unwrap();
-                if msg.is_binary() || msg.is_text() {
-                    websocket.write_message(msg).unwrap();
-                }
-            }
-        });
+    world
+        .create_entity()
+        .with(comn::art::Appearance {
+            filepath: String::from("hi"),
+        })
+        .with(SimplePosition(na::Isometry3::<f32>::translation(
+            0.0, 0.1, 0.1,
+        )))
+        .build();
+
+    info!("starting game loop!");
+
+    let mut fixedstep = fixedstep::FixedStep::start(60.0); // 60.0Hz
+
+    loop {
+        while fixedstep.update() {
+            dispatcher.dispatch(&mut world);
+            world.maintain();
+        }
     }
 }

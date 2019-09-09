@@ -13,5 +13,5 @@ specs-physics = { git = "https://github.com/cedric-h/specs-physics.git", branch 
 nalgebra = { version = "0.18.0", features = ["serde-serialize"] }
 
 # serialization
-serde = { version = "1.0.99", features = ["derive"] }
+serde = "1.0.99"
 rmp-serde = "0.14.0"

@@ -9,6 +9,8 @@ mod tests {
 pub use nalgebra as na;
 pub use serde;
 pub use rmp_serde as rmps;
+pub use specs;
+pub use specs_physics;
 
 pub mod net {
     pub use msg::NetMessage;
@@ -18,7 +20,7 @@ pub mod net {
         use super::NetComponent;
         use serde::{Deserialize, Serialize};
 
-        #[derive(Deserialize, Serialize)]
+        #[derive(Deserialize, Serialize, Debug)]
         pub enum NetMessage {
             NewEnt(u32),
             InsertComp(u32, NetComponent),
@@ -27,38 +29,34 @@ pub mod net {
 
     mod comp {
         use crate::art::Appearance;
+        use specs::{Entity, LazyUpdate};
         use specs_physics::SimplePosition;
         use serde::{Deserialize, Serialize};
 
-        #[derive(Deserialize, Serialize)]
+        #[derive(Deserialize, Serialize, Debug)]
         pub enum NetComponent {
             Appearance(Appearance),
             SimplePosition(SimplePosition<f32>),
         }
 
+        impl From<Appearance> for NetComponent {
+            fn from(c: Appearance) -> Self {
+                NetComponent::Appearance(c)
+            }
+        }
+
+        impl From<SimplePosition<f32>> for NetComponent {
+            fn from(c: SimplePosition<f32>) -> Self {
+                NetComponent::SimplePosition(c)
+            }
+        }
+
         impl NetComponent {
-            pub fn insert(self, lu: &specs::LazyUpdate, ent: specs::Entity) {
+            pub fn insert(self, ent: Entity, lu: &LazyUpdate) {
                 match self {
                     NetComponent::Appearance(c) => lu.insert(ent, c),
                     NetComponent::SimplePosition(c) => lu.insert(ent, c),
                 }
-            }
-
-            pub fn from_comp<C: specs::Component>(comp: C) -> Self {
-                use core::any::Any;
-
-                let comp = &comp as &dyn Any;
-
-                // using stupid if and return syntax here instead of implicit return
-                // for easier macroing later
-                if let Some(c) = comp.downcast_ref::<Appearance>() {
-                    return NetComponent::Appearance(c.clone());
-                }
-                if let Some(c) = comp.downcast_ref::<SimplePosition<f32>>() {
-                    return NetComponent::SimplePosition(c.clone());
-                }
-
-                unreachable!("Unregistered Component!")
             }
         }
     }
@@ -69,7 +67,7 @@ pub mod art {
     use specs::{prelude::*, Component};
     use serde::{Deserialize, Serialize};
 
-    #[derive(Clone, Component, Serialize, Deserialize)]
+    #[derive(Clone, Debug, Component, Serialize, Deserialize)]
     pub struct Appearance {
         pub filepath: String,
     }

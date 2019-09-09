@@ -4,8 +4,8 @@ extern crate stdweb;
 use stdweb::web::window;
 
 pub mod prelude {
-    pub use specs::{prelude::*, Component};
     pub use comn::rmps;
+    pub use specs::{prelude::*, Component};
     // specs physics
     pub use specs_physics::{
         colliders::Shape, nalgebra as na, ncollide::query::Ray, nphysics::object::BodyStatus,
@@ -61,20 +61,33 @@ mod renderer {
 }
 
 mod net {
+    use comn::{rmps, NetMessage};
     use specs::prelude::*;
-    use std::{collections::HashMap, sync::{Arc, Mutex}};
+    use std::{
+        collections::HashMap,
+        sync::{Arc, Mutex},
+    };
     use stdweb::{
         console,
         traits::*,
+        unstable::TryInto,
         web::{
             event::{SocketCloseEvent, SocketErrorEvent, SocketMessageEvent, SocketOpenEvent},
-            IEventTarget, WebSocket,
+            ArrayBuffer, IEventTarget, WebSocket,
         },
+        Value,
     };
 
     pub struct ServerConnection {
         ws: WebSocket,
-        pub message_queue: Arc<Mutex<Vec<comn::NetMessage>>>,
+        pub message_queue: Arc<Mutex<Vec<NetMessage>>>,
+    }
+    impl ServerConnection {
+        fn send(&self, msg: NetMessage) {
+            self.ws
+                .send_bytes(&rmps::encode::to_vec(&msg).expect("Couldn't encode NetMessage!"))
+                .expect("Couldn't send NetMessage to server!");
+        }
     }
 
     impl Default for ServerConnection {
@@ -101,16 +114,29 @@ mod net {
                 let msgs = message_queue.clone();
 
                 move |msg: SocketMessageEvent| {
-                    console!(log, "ServerMessage");
+                    let msgs = msgs.clone();
 
-                    let buf: Vec<u8> = msg
-                        .data()
-                        .into_array_buffer()
-                        .expect("We got a message that isn't an array buf!")
-                        .into();
+                    let parse_msg_data = move |data: Value| {
+                        let buf: ArrayBuffer = data
+                            .try_into()
+                            .expect("Couldn't turn server message into array buffer!");
 
-                    let mut msgs = msgs.lock().expect("The Server Message Queue is locked!");
-                    msgs.push(comn::rmps::from_read_ref(&buf).expect("couldn't read net message bytes"));
+                        let mut msgs = msgs.lock().expect("The Server Message Queue is locked!");
+                        msgs.push(
+                            rmps::from_read_ref::<Vec<u8>, _>(&buf.into())
+                                .expect("couldn't read net message bytes"),
+                        );
+                    };
+
+                    js! {
+                        let reader = new FileReader();
+                        reader.addEventListener("loadend", () => {
+                            let parse = @{parse_msg_data};
+                            parse(reader.result);
+                            parse.drop();
+                        });
+                        reader.readAsArrayBuffer(@{msg}.data);
+                    };
                 }
             });
 
@@ -132,13 +158,13 @@ mod net {
         fn run(&mut self, (ents, lu, sc): Self::SystemData) {
             if let Ok(mut msgs) = sc.message_queue.try_lock() {
                 for msg in msgs.drain(0..) {
-                    use comn::NetMessage::*;
+                    use NetMessage::*;
 
                     match msg {
                         NewEnt(server) => {
                             let local: u32 = ents.create().id();
                             self.server_to_local_ids.insert(server, local);
-                        },
+                        }
                         InsertComp(id, net_comp) => {
                             let ent = self
                                 .server_to_local_ids
@@ -152,7 +178,7 @@ mod net {
                                 });
 
                             if let Some(ent) = ent {
-                                net_comp.insert(&lu, ent);
+                                net_comp.insert(ent, &lu);
                             } else {
                                 console!(error, "Can't insert component for dead entity");
                             }
@@ -165,8 +191,6 @@ mod net {
 }
 
 fn main() {
-    use std::f32::consts::PI;
-
     stdweb::initialize();
     // https://github.com/rustwasm/console_error_panic_hook/blob/master/src/lib.rs ?
 
@@ -182,27 +206,6 @@ fn main() {
 
     // go through all of the systems and register components and resources accordingly
     dispatcher.setup(&mut world);
-
-    // add some dummy ents
-    world
-        .create_entity()
-        .with(comn::art::Appearance {
-            filepath: String::from("hi"),
-        })
-        .with(SimplePosition(na::Isometry3::rotation(
-            na::Vector3::repeat(PI * 0.25),
-        )))
-        .build();
-
-    world
-        .create_entity()
-        .with(comn::art::Appearance {
-            filepath: String::from("hi"),
-        })
-        .with(SimplePosition(na::Isometry3::<f32>::translation(
-            0.0, 0.1, 0.1,
-        )))
-        .build();
 
     fn game_loop(mut dispatcher: specs::Dispatcher<'static, 'static>, mut world: specs::World) {
         // run all of the ECS systems
