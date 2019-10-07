@@ -36,9 +36,14 @@ impl ConnectionManager {
 
                 move || loop {
                     while let Ok((to_addr, msg)) = msgs_to_send.recv() {
-                        channels.lock().expect("couldn't get channels map")[&to_addr]
-                            .send(msg)
-                            .expect("couldn't send message to thread for websocket");
+                        // the only other time a lock on this mutex can occur is when
+                        // someone is connecting, so theoretically there could be a hitch
+                        // then.
+                        if let Err(_) =
+                            channels.lock().expect("couldn't get channels map")[&to_addr].send(msg)
+                        {
+                            error!("couldn't send message to thread for websocket");
+                        }
                     }
                 }
             });
@@ -97,7 +102,7 @@ impl ConnectionManager {
                             "Couldn't send connection established NewEnt message over channel!",
                         );
 
-                    loop {
+                    'poll: loop {
                         if let Ok(Message::Binary(data)) = websocket.read_message() {
                             msgs_for_srv
                                 .send((
@@ -108,14 +113,13 @@ impl ConnectionManager {
                                 .expect("Couldn't send NetMessage over channel!");
                         }
 
-                        while let Ok(msg) = msgs_to_send.recv() {
+                        while let Ok(msg) = msgs_to_send.try_recv() {
                             trace!("got {:#?} for {:#?}", msg, addr);
-                            websocket
-                                .write_message(Message::Binary(
-                                    rmps::encode::to_vec(&msg)
-                                        .expect("Couldn't encode NetMessage!"),
-                                ))
-                                .expect("Couldn't send Message over websocket!");
+                            if let Err(_) = websocket.write_message(Message::Binary(
+                                rmps::encode::to_vec(&msg).expect("Couldn't encode NetMessage!"),
+                            )) {
+                                break 'poll;
+                            }
                         }
                     }
                 });

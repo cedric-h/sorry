@@ -1,5 +1,5 @@
 use super::prelude::*;
-use comn::{specs, NetMessage};
+use comn::{prelude::*, specs, NetMessage};
 use log::*;
 use specs::prelude::*;
 
@@ -40,6 +40,24 @@ impl<'a> System<'a> for HandleClientPackets {
                         clients.insert(ent, Client(addr.clone())).unwrap();
                         logging_ins.insert(ent, LoggingIn).unwrap();
                         cm.addr_to_ent.insert(addr, ent.id());
+
+                        lu.insert(ent, SimplePosition::<f32>(na::Isometry3::identity()));
+                        lu.insert(ent, comn::art::Appearance::new("hi"));
+                        lu.insert(
+                            ent,
+                            PhysicsBodyBuilder::<f32>::from(BodyStatus::Dynamic)
+                                .gravity_enabled(true)
+                                .mass(0.0)
+                                .build(),
+                        );
+                        lu.insert(
+                            ent,
+                            PhysicsColliderBuilder::from(Shape::Cuboid {
+                                half_extents: na::Vector3::<f32>::repeat(0.1),
+                            })
+                            .density(0.18)
+                            .build(),
+                        );
                     }
                 }
 

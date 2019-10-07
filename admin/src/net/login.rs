@@ -23,12 +23,22 @@ impl<'a> System<'a> for SendWorldToNewPlayers {
             debug!("We're about to tell a new player about the world.");
             // tell them about each new entity they need to add, and about
             // some crucial components it has.
-            for (iso, appearance, ent) in (&isos, &appearances, &*ents).join() {
+            for (iso, appearance, ent) in (&isos, appearances.maybe(), &*ents).join() {
                 trace!("telling new player about an existing entity");
                 cm.new_ent(*addr, ent);
                 cm.insert_comp(*addr, ent, iso.clone());
-                cm.insert_comp(*addr, ent, appearance.clone());
+                if let Some(appearance) = appearance {
+                    cm.insert_comp(*addr, ent, appearance.clone());
+                }
             }
+
+            // tell them which of all of those entities
+            // they should be looking out of
+            cm.insert_comp(
+                *addr,
+                ents.entity(cm.addr_to_ent[&addr]),
+                comn::controls::Camera,
+            );
         }
     }
 }

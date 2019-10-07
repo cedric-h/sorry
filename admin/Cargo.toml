@@ -22,3 +22,5 @@ log = "0.4.8"
 specs-derive = "0.4.0"
 fixedstep = "0.3.0"
 
+[patch.crates-io]
+shred = { git = "https://github.com/mystal/shred", branch = "fix_no_parallel" }

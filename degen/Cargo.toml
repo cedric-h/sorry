@@ -14,8 +14,11 @@ stdweb = "0.4.18"
 comn = { path = "../comn" }
 
 # math/ecs (have to use the non-parallel versions of these, WASM sucks like that)
-specs = { version = "0.15.0", features = ["specs-derive", "stdweb"], default-features = false }
+specs = { version = "0.15.1", features = ["specs-derive", "stdweb"], default-features = false }
 specs-physics = { git = "https://github.com/cedric-h/specs-physics.git", branch = "default-parallel-feature", features = ["serde-serialize"], default-features = false }
 
 # serialization
 serde = { version = "1.0.99", features = ["derive"] }
+
+[patch.crates-io]
+shred = { git = "https://github.com/mystal/shred", branch = "fix_no_parallel" }

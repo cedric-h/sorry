@@ -1,10 +1,12 @@
 mod connection_manager;
 mod login;
 mod packets;
+mod phys;
 
 // main.rs needs to put these Systems in the graph
 pub use login::SendWorldToNewPlayers;
 pub use packets::HandleClientPackets;
+pub use phys::SendNewPositions;
 
 // next we define a few components we'll need to do networking.
 use comn::specs::prelude::*;
