@@ -33,7 +33,7 @@ impl Enemy {
 
     // returns a boolean indicating whether or not the player died
     pub fn damage(&mut self) -> bool {
-        self.health -= 1;
+        self.health = self.health.checked_sub(1).unwrap_or(0);
         self.health == 0
     }
 }

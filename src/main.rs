@@ -41,7 +41,7 @@ pub struct Level {
 }
 
 impl Level {
-    fn first() -> Self {
+    fn third() -> Self {
         Level {
             setup: Box::new(|game: &mut Game| {
                 game.insert_enemy(
@@ -53,9 +53,9 @@ impl Level {
                         Vector2::new(24.0, 15.0),
                         Vector2::new(11.0, 20.0),
                         Vector2::new(24.0, 25.0),
-                        Vector2::new(11.0, 30.0),
-                        Vector2::new(24.0, 35.0),
-                    ], 8, 0.3),
+                        Vector2::new(11.0, 28.0),
+                        Vector2::new(24.0, 28.0),
+                    ], 6, 0.3),
                 );
                 game.insert_enemy(
                     "Little Doll",
@@ -68,9 +68,22 @@ impl Level {
                         Vector2::new(15.0, 20.0),
                         Vector2::new(8.0, 24.0),
                         Vector2::new(15.0, 28.0),
-                        Vector2::new(8.0, 32.0),
-                        Vector2::new(15.0, 36.0),
-                    ], 8, 0.3),
+                       
+                    ], 6, 0.3),
+                );
+                game.insert_enemy(
+                    "Little Doll",
+                    Isometry2::translation(26.5, 0.0),
+                    Cuboid::new(Vector2::new(1.0, 2.5)),
+                    Enemy::new(vec![
+                        Vector2::new(14.0, 8.0),
+                        Vector2::new(19.0, 12.0),
+                        Vector2::new(14.0, 16.0),
+                        Vector2::new(19.0, 20.0),
+                        Vector2::new(14.0, 24.0),
+                        Vector2::new(19.0, 28.0),
+                       
+                    ], 6, 0.3),
                 );
             }),
             update: Box::new({
@@ -94,12 +107,160 @@ impl Level {
                                 },
                             );
                         }
-                        *cooldown = 5;
+                        *cooldown = 8;
                     } else {
                         *cooldown -= 1;
                     }
                     if game.enemies.len() == 0 {
-                        js! { alert("You survived first round.") };
+                        js! { alert("You survived third round.") };
+                        game.change_level(Level::fourth());
+                    }
+                }
+            }),
+        }
+    }
+
+    fn fourth() -> Self {
+        Level {
+            setup: Box::new(|game: &mut Game| {
+                game.insert_enemy(
+                    "Little Doll",
+                    Isometry2::translation(0.0, 0.0),
+                    Cuboid::new(Vector2::new(1.0, 2.5)),
+                    Enemy::new(vec![
+                        Vector2::new(0.0, 1.0),
+                        Vector2::new(0.0, 2.0),
+                        Vector2::new(2.0, 3.0),
+                        Vector2::new(4.0, 4.0),
+                        Vector2::new(6.0, 5.0),
+                        Vector2::new(8.0, 6.0),
+                        Vector2::new(10.0, 7.0),
+                        Vector2::new(12.0, 8.0),
+                        Vector2::new(14.0, 9.0),
+                        Vector2::new(16.0, 10.0),
+                        Vector2::new(18.0, 11.0),
+                        Vector2::new(20.0, 12.0),
+                        Vector2::new(22.0, 13.0),
+                        Vector2::new(24.0, 14.0),
+                        Vector2::new(26.0, 15.0),
+                        Vector2::new(28.0, 16.0),
+                        Vector2::new(30.0, 17.0),
+                        Vector2::new(32.0, 18.0),
+                        Vector2::new(30.0, 14.0),
+                        Vector2::new(28.0, 15.0),
+                        Vector2::new(26.0, 16.0),
+                        Vector2::new(24.0, 17.0),
+                        Vector2::new(22.0, 18.0),
+                        Vector2::new(20.0, 19.0),
+                        Vector2::new(18.0, 20.0),
+                        Vector2::new(16.0, 21.0),
+                        Vector2::new(14.0, 22.0),
+                        Vector2::new(12.0, 23.0),
+                        Vector2::new(10.0, 24.0),
+                        Vector2::new(8.0, 25.0),
+                        Vector2::new(6.0, 26.0),
+                        Vector2::new(4.0, 27.0),
+                        Vector2::new(6.0, 23.0),
+                        Vector2::new(8.0, 24.0),
+                        Vector2::new(10.0, 25.0),
+                        Vector2::new(12.0, 26.0),
+                        Vector2::new(14.0, 28.0),
+                        Vector2::new(16.0, 29.0),
+                        Vector2::new(18.0, 30.0),
+                        Vector2::new(20.0, 31.0),
+                        Vector2::new(22.0, 32.0),
+                        Vector2::new(24.0, 33.0),
+                        Vector2::new(26.0, 34.0),
+                        Vector2::new(28.0, 35.0),
+                    ], 20, 0.1),
+                );
+            }),
+            update: Box::new({
+                let cooldown = Arc::new(Mutex::new(10));
+
+                move |game: &mut Game| {
+                    let mut cooldown = cooldown.lock().unwrap();
+                    if *cooldown == 0 {
+                        for i_enemy in game.enemies.clone().keys() {
+                            let enemy_pos = game.isos.get(i_enemy).expect("enemy with no pos").clone();
+
+                            for i in 0..10 {
+                                game.insert_bullet(
+                                    "Flower3",
+                                    enemy_pos.clone(),
+                                    Cuboid::new(Vector2::new(1.0, 1.0)),
+                                    Bullet {
+                                        kind: BulletKind::Straight(
+                                            Vector2::new(
+                                                1.0 - random() * 2.0,
+                                                1.0 - random() * 2.0,
+                                                )
+                                                .normalize()
+                                                * 0.2,
+                                        ),
+                                        kills: Kills::Good,
+                                    },
+                                );
+                            }
+                        }
+                        *cooldown = 20;
+                    } else {
+                        *cooldown -= 1;
+                    }
+                    if game.enemies.len() == 0 {
+                        js! { alert("You survived the fourth round.") };
+                        game.change_level(Level::fifth());
+                    }
+                }
+            }),
+        }
+    }
+
+    fn fifth() -> Self {
+        Level {
+            setup: Box::new(|game: &mut Game| {
+                game.insert_enemy(
+                    "Eye",
+                    Isometry2::translation(17.5, 5.0),
+                    Cuboid::new(Vector2::new(1.0, 2.5)),
+                    Enemy::new(
+                        vec![Vector2::new(17.5, 4.0), Vector2::new(17.5, 6.0)],
+                        6,
+                        0.3,
+                    ),
+                );
+            }),
+            update: Box::new({
+                let cooldown = Arc::new(Mutex::new(10));
+
+                move |game: &mut Game| {
+                    let mut cooldown = cooldown.lock().unwrap();
+                    if *cooldown == 0 {
+                        for i_enemy in game.enemies.clone().keys() {
+                            let enemy_pos = game.isos.get(i_enemy).expect("enemy with no pos").clone();
+
+                            for i in 0..20 {
+                                game.insert_bullet(
+                                    "Flower3",
+                                    enemy_pos.clone(),
+                                    Cuboid::new(Vector2::new(1.0, 1.0)),
+                                    Bullet {
+                                        kind: BulletKind::Straight(
+                                            Vector2::new(1.0 - random() * 2.0, random())
+                                                .normalize()
+                                                * 0.6,
+                                        ),
+                                        kills: Kills::Good,
+                                    },
+                                );
+                            }
+                        }
+                        *cooldown = 8;
+                    } else {
+                        *cooldown -= 1;
+                    }
+                    if game.enemies.len() == 0 {
+                        js! { alert("You survived final round.") };
                         game.change_level(Level::second());
                     }
                 }
@@ -110,10 +271,10 @@ impl Level {
     fn second() -> Self {
         Level {
             setup: Box::new(|game: &mut Game| {
-                for i in 0..10 {
+                for i in 0..40 {
                     game.insert_bullet(
                         "Flower3",
-                        Isometry2::translation(0.0, (i as f32) * 5.0),
+                        Isometry2::translation(0.0, (i as f32) * 1.0),
                         Cuboid::new(Vector2::new(1.0, 1.0)),
                         Bullet {
                             kind: BulletKind::Straight(
@@ -127,6 +288,57 @@ impl Level {
             update: Box::new(|game: &mut Game| {
                 if game.bullets.len() == 0 {
                     js! { alert("You survived second round.") };
+                    game.change_level(Level::third());
+                }
+            }),
+        }
+    }
+
+    fn first() -> Self {
+        Level {
+            setup: Box::new(|game: &mut Game| {
+                game.insert_enemy(
+                    "Eye",
+                    Isometry2::translation(17.5, 5.0),
+                    Cuboid::new(Vector2::new(1.0, 2.5)),
+                    Enemy::new(vec![
+                        Vector2::new(17.5, 4.0),
+                        Vector2::new(17.5, 6.0),
+                    ], 6, 0.3),
+                );
+            }),
+            update: Box::new({
+                let cooldown = Arc::new(Mutex::new(10));
+
+                move |game: &mut Game| {
+                    let mut cooldown = cooldown.lock().unwrap();
+                    if *cooldown == 0 {
+                        for i_enemy in game.enemies.clone().keys() {
+                            let enemy_pos = game.isos.get(i_enemy).expect("enemy with no pos");
+
+                            game.insert_bullet(
+                                "Flower3",
+                                enemy_pos.clone(),
+                                Cuboid::new(Vector2::new(1.0, 1.0)),
+                                Bullet {
+                                    kind: BulletKind::Straight(
+                                        Vector2::new(
+                                            1.0 - random() * 2.0,
+                                            random(),
+                                        ).normalize() * 0.8
+                                    ),
+                                    kills: Kills::Good,
+                                },
+                            );
+                        }
+                        *cooldown = 12;
+                    } else {
+                        *cooldown -= 1;
+                    }
+                    if game.enemies.len() == 0 {
+                        js! { alert("You survived first round.") };
+                        game.change_level(Level::second());
+                    }
                 }
             }),
         }
@@ -223,6 +435,7 @@ impl Game {
     }
 
     pub fn change_level(&mut self, level: Level) {
+        self.controls.keys.lock().unwrap().clear();
         (level.setup)(self);
         self.level = Arc::new(Mutex::new(level));
     }
