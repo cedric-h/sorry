@@ -4,14 +4,16 @@ use super::*;
 pub struct Enemy {
     pub route: Vec<Vector2<f32>>,
     pub health: usize,
+    pub speed: f32,
     pub goal: usize,
 }
 
 impl Enemy {
-    pub fn new(route: Vec<Vector2<f32>>, health: usize) -> Self {
+    pub fn new(route: Vec<Vector2<f32>>, health: usize, speed: f32) -> Self {
         Enemy {
             route,
             health,
+            speed,
             goal: 0,
         }
     }
@@ -19,7 +21,7 @@ impl Enemy {
     pub fn update(&mut self, pos: &mut Isometry2<f32>) {
         let vec = pos.translation.vector;
         let to_go = self.route[self.goal];
-        pos.translation.vector -= (vec - to_go).normalize() * 0.3;
+        pos.translation.vector -= (vec - to_go).normalize() * self.speed;
 
         if (vec - to_go).magnitude().abs() < 0.2 {
             self.goal += 1;

@@ -24,6 +24,7 @@ let imgs = {
 	"Eye": "Eye.jpg",
 	"Flower3": "Flower3.png",
 	"Background": "StageBackground.png",
+	"Little Doll": "doll.png"
 };
 
 for (let img in imgs) {

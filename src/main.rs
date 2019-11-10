@@ -45,14 +45,36 @@ impl Level {
         Level {
             setup: Box::new(|game: &mut Game| {
                 game.insert_enemy(
-                    "Eye",
-                    Isometry2::translation(5.0, 5.0),
-                    Cuboid::new(Vector2::repeat(0.9)),
-                    Enemy::new(vec![Vector2::new(20.0, 20.0), Vector2::new(20.0, 5.0)], 3),
+                    "Little Doll",
+                    Isometry2::translation(17.5, 0.0),
+                    Cuboid::new(Vector2::new(1.0, 2.5)),
+                    Enemy::new(vec![
+                        Vector2::new(11.0, 10.0),
+                        Vector2::new(24.0, 15.0),
+                        Vector2::new(11.0, 20.0),
+                        Vector2::new(24.0, 25.0),
+                        Vector2::new(11.0, 30.0),
+                        Vector2::new(24.0, 35.0),
+                    ], 8, 0.3),
+                );
+                game.insert_enemy(
+                    "Little Doll",
+                    Isometry2::translation(8.75, 0.0),
+                    Cuboid::new(Vector2::new(1.0, 2.5)),
+                    Enemy::new(vec![
+                        Vector2::new(8.0, 8.0),
+                        Vector2::new(15.0, 12.0),
+                        Vector2::new(8.0, 16.0),
+                        Vector2::new(15.0, 20.0),
+                        Vector2::new(8.0, 24.0),
+                        Vector2::new(15.0, 28.0),
+                        Vector2::new(8.0, 32.0),
+                        Vector2::new(15.0, 36.0),
+                    ], 8, 0.3),
                 );
             }),
             update: Box::new({
-                let cooldown = Arc::new(Mutex::new(0));
+                let cooldown = Arc::new(Mutex::new(10));
 
                 move |game: &mut Game| {
                     let mut cooldown = cooldown.lock().unwrap();
@@ -77,7 +99,7 @@ impl Level {
                         *cooldown -= 1;
                     }
                     if game.enemies.len() == 0 {
-                        js! { alert("you won first round") };
+                        js! { alert("You survived first round.") };
                         game.change_level(Level::second());
                     }
                 }
@@ -104,7 +126,7 @@ impl Level {
             }),
             update: Box::new(|game: &mut Game| {
                 if game.bullets.len() == 0 {
-                    js! { alert("you win second round") };
+                    js! { alert("You survived second round.") };
                 }
             }),
         }
