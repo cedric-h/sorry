@@ -20,9 +20,9 @@ ctx.font = "15px Arial";
 ctx.scale(window.innerWidth/xSize, window.innerHeight/ySize);
 
 let imgs = {
-	"Player": "Heart.png",
-	"Enemy": "Eye.jpg",
-	"Bullet": "Flower3.png",
+	"Heart": "Heart.png",
+	"Eye": "Eye.jpg",
+	"Flower3": "Flower3.png",
 	"Background": "StageBackground.png",
 };
 

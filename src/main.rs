@@ -45,6 +45,7 @@ impl Level {
         Level {
             setup: Box::new(|game: &mut Game| {
                 game.insert_enemy(
+                    "Eye",
                     Isometry2::translation(5.0, 5.0),
                     Cuboid::new(Vector2::repeat(0.9)),
                     Enemy::new(vec![Vector2::new(20.0, 20.0), Vector2::new(20.0, 5.0)], 3),
@@ -60,6 +61,7 @@ impl Level {
                             let enemy_pos = game.isos.get(i_enemy).expect("enemy with no pos");
 
                             game.insert_bullet(
+                                "Flower3",
                                 enemy_pos.clone(),
                                 Cuboid::new(Vector2::new(1.0, 1.0)),
                                 Bullet {
@@ -88,6 +90,7 @@ impl Level {
             setup: Box::new(|game: &mut Game| {
                 for i in 0..10 {
                     game.insert_bullet(
+                        "Flower3",
                         Isometry2::translation(0.0, (i as f32) * 5.0),
                         Cuboid::new(Vector2::new(1.0, 1.0)),
                         Bullet {
@@ -171,24 +174,24 @@ impl Game {
         self.appearances.remove(kill);
     }
 
-    pub fn insert_bullet(&mut self, iso: Isometry2<f32>, hb: Cuboid<f32>, bullet: Bullet) -> usize {
+    pub fn insert_bullet<S: Into<String>>(&mut self, appearance: S, iso: Isometry2<f32>, hb: Cuboid<f32>, bullet: Bullet) -> usize {
         let ent = self.entity();
 
         self.isos.insert(ent, iso);
         self.bullets.insert(ent, bullet);
         self.hitboxes.insert(ent, hb);
-        self.appearances.insert(ent, "Bullet".to_string());
+        self.appearances.insert(ent, appearance.into());
 
         ent
     }
 
-    pub fn insert_enemy(&mut self, iso: Isometry2<f32>, hb: Cuboid<f32>, enemy: Enemy) -> usize {
+    pub fn insert_enemy<S: Into<String>>(&mut self, appearance: S, iso: Isometry2<f32>, hb: Cuboid<f32>, enemy: Enemy) -> usize {
         let ent = self.entity();
 
         self.isos.insert(ent, iso);
         self.enemies.insert(ent, enemy);
         self.hitboxes.insert(ent, hb);
-        self.appearances.insert(ent, "Enemy".to_string());
+        self.appearances.insert(ent, appearance.into());
 
         ent
     }
@@ -224,7 +227,7 @@ fn main() {
     game.isos
         .insert(player, Isometry2::translation(35.0 / 2.0, 35.0 / 2.0));
     game.appearances
-        .insert(player, "Player".to_string());
+        .insert(player, "Heart".to_string());
 
     fn game_loop(mut game: Game) {
         use nc::query::PointQuery;
@@ -237,6 +240,7 @@ fn main() {
         if should_shoot {
             if game.shooting_cooldown == 0 {
                 game.insert_bullet(
+                    "Flower3",
                     player_pos.clone(),
                     Cuboid::new(Vector2::new(1.0, 1.0)),
                     Bullet {
