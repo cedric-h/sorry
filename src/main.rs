@@ -461,6 +461,7 @@ fn main() {
     let player = game.player();
     game.isos
         .insert(player, Isometry2::translation(35.0 / 2.0, 35.0 / 2.0));
+    game.hitboxes.insert(player, Cuboid::new(Vector2::new(1.0, 1.0)));
     game.appearances
         .insert(player, "Heart".to_string());
 
@@ -503,7 +504,14 @@ fn main() {
                         .vector,
                 ),
             ) {
-                dead.push(*i_hitbox);
+                if *i_hitbox == game.player {
+                    js! {
+                        alert("You died!");
+                        location.reload();
+                    }
+                } else {
+                    dead.push(*i_hitbox);
+                }
             }
         }
 

@@ -22,7 +22,14 @@ impl Controls {
     fn handle_key_event<K: IKeyboardEvent + ConcreteEvent>(keys: KeyMap, key_down: bool) {
         document().add_event_listener(move |e: K| {
             if !e.repeat() {
-                let first_letter = e.key().chars().next().expect("zero length key name");
+                let first_letter = e
+                    .key()
+                    .chars()
+                    .next()
+                    .expect("zero length key name")
+                    .to_lowercase()
+                    .next()
+                    .expect("there is no lowercase");
                 if "wsad,".contains(first_letter) {
                     keys.lock()
                         .expect("Can't lock keys")
